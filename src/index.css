@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-900 text-gray-100;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Scroll suave no console */
+.console-output {
+  scrollbar-width: thin;
+  scrollbar-color: #00ff9d #1f2937;
+}
+.console-output::-webkit-scrollbar {
+  width: 6px;
+}
+.console-output::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+.console-output::-webkit-scrollbar-thumb {
+  background-color: #00ff9d;
+  border-radius: 10px;
+}

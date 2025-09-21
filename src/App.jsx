@@ -7,11 +7,11 @@ function App() {
   const [code, setCode] = useState('// Escreva seu código JS aqui...\nconsole.log("Olá, Saul Developer! 🚀")');
   const [consoleOutput, setConsoleOutput] = useState([]);
   const [isDark, setIsDark] = useState(true);
+  const [isConsoleOpen, setIsConsoleOpen] = useState(true); // Controle para mobile
 
   const runCode = () => {
     setConsoleOutput([]); // Limpa console
 
-    // Redireciona console.log para nosso console virtual
     const originalLog = console.log;
     const originalError = console.error;
 
@@ -26,7 +26,6 @@ function App() {
     };
 
     try {
-      // Sandbox seguro com Function
       const safeFn = new Function('console', code);
       safeFn(console);
     } catch (err) {
@@ -34,29 +33,54 @@ function App() {
       console.error(err);
     }
 
-    // Restaura os consoles originais
     console.log = originalLog;
     console.error = originalError;
   };
+
+  // Detecta mobile para fechar console por padrão
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    setIsConsoleOpen(!isMobile);
+  }, []);
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
       <Header isDark={isDark} setIsDark={setIsDark} />
 
-      <main className="container mx-auto p-4 md:p-6 max-w-7xl h-screen flex flex-col md:flex-row gap-4">
-        <div className="flex-1 min-h-96 md:h-full rounded-xl bg-gray-800/50 p-4 shadow-lg border border-gray-700/50">
+      <main className="container mx-auto p-2 sm:p-4 md:p-6 max-w-7xl h-[calc(100vh-4rem)] flex flex-col md:flex-row gap-3 sm:gap-4">
+        {/* Editor — ocupa todo espaço disponível */}
+        <div className="flex-1 min-h-64 md:min-h-96 rounded-xl bg-gray-800/50 p-3 sm:p-4 shadow-lg border border-gray-700/50 flex flex-col">
           <Editor code={code} setCode={setCode} />
         </div>
 
-        <div className="w-full md:w-96 h-96 md:h-full flex flex-col rounded-xl bg-gray-800/50 shadow-lg border border-gray-700/50">
-          <Console output={consoleOutput} />
+        {/* Console — colapsável em mobile */}
+        <div className={`transition-all duration-300 ease-in-out md:w-96 md:h-auto w-full ${
+          isConsoleOpen ? 'h-64 md:h-full' : 'h-12'
+        } rounded-xl bg-gray-800/50 shadow-lg border border-gray-700/50 flex flex-col overflow-hidden`}>
+          {/* Botão toggle console em mobile */}
+          <button
+            onClick={() => setIsConsoleOpen(!isConsoleOpen)}
+            className="md:hidden p-2 text-sm font-semibold bg-gray-700 hover:bg-gray-600 transition-colors rounded-t-xl flex justify-between items-center"
+            aria-label={isConsoleOpen ? "Fechar console" : "Abrir console"}
+          >
+            <span>Console</span>
+            <span>{isConsoleOpen ? '▲' : '▼'}</span>
+          </button>
+
+          {/* Conteúdo do console (só mostra se estiver aberto) */}
+          {isConsoleOpen && (
+            <div className="flex-1 overflow-y-auto p-2 sm:p-4">
+              <Console output={consoleOutput} />
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Botão Run Fixo no Bottom Right (perfeito pra vídeos!) */}
+      {/* Botão Run Code — responsivo e fixo */}
       <button
         onClick={runCode}
-        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 px-6 py-3 bg-saul hover:bg-green-400 text-gray-900 font-bold rounded-full shadow-lg animate-pulse hover:animate-none transition-all duration-300 z-50"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 px-4 sm:px-6 py-2 sm:py-3 bg-saul hover:bg-green-400 text-gray-900 font-bold rounded-full shadow-lg animate-pulse hover:animate-none transition-all duration-300 z-50 text-sm sm:text-base"
+        aria-label="Executar código"
       >
         ▶️ Run Code
       </button>
